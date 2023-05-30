@@ -1,0 +1,70 @@
+   подключение
+
+    def __init__(self):
+        self.connection= pymysql.connect(
+            host='localhost',
+            port=3306,
+            user='root',
+            password='root',
+            database='astra',
+        )
+ 
+
+выбор логинов
+
+	def check_login(self):
+        log = []
+        cursor = self.connection.cursor()
+        cursor.execute(f"""SELECT Login FROM Employee""")
+        rows = cursor.fetchall()
+        for i in rows:
+            for j in i:
+                log.append(j)
+        return log
+
+
+выбор для таблицы
+
+    def print_order_by_id(self,id):
+        cursor = self.connection.cursor()
+        cursor.execute(f" SELECT orders.OrderID,clients.ClientName, orders.OrderProduct,producttype.ProdTitle, "
+                       f"orders.RegDate, orders.CloseDate, orders.Summ, orders.quntity, orders.NDS, orders.TotalSum, "
+                       f"paystatus.PayStatTitle,  loadstatus.loadstatustitle "
+                       f"FROM orders AS orders "
+                       f"INNER JOIN paystatus AS paystatus ON orders.Payed = paystatus.idPayStatus "
+                       f"inner join clients as clients On orders.ClientID = clients.ClientID "
+                       f"inner join loadstatus as loadstatus on orders.Loaded = loadstatus.idLoadStatus "
+                       f"inner join producttype as producttype on orders.ProdTypeID = producttype.ProdID"
+                       f" WHERE OrderID='{id}';")
+        order = cursor.fetchall()
+        cursor.close()
+        return order
+
+
+диалогове окно
+    def error(self):
+        self.mesbox = QMessageBox(self)
+        self.mesbox.setWindowTitle("Ошибка")
+        self.mesbox.setText("Ошибка входа")
+        self.mesbox.setStandardButtons(QMessageBox.Ok)
+        self.mesbox.show()
+
+
+текцщий столбец
+    def get_ID(self):
+        ID_data=self.ui.table.item(self.ui.table.currentRow(), 0).text()
+        print(ID_data)
+        return ID_data
+
+
+печать таблицы
+self.table.clear()
+        self.table.setColumnCount(13)  # кол-во столбцов
+        self.table.setRowCount(len(out))  # кол-во строк
+        self.table.setHorizontalHeaderLabels(['ID', 'Контрагент', 'Заказанная продукция','Тип продукции','Дата регистрации', 'Дата закрытия','Цена за единицу','Количество', 'Сумма','НДС','Итоговая сумма','Статус оплаты','статус отгрузки'])
+        for i, order in enumerate(out):
+            for x, field in enumerate(order):  # i, x - координаты ячейки, в которую будем записывать текст
+                item = QTableWidgetItem()
+                item.setText(str(field))  # записываем текст в ячейку
+                item.setFlags(Qt.ItemIsEnabled)
+                self.table.setItem(i, x, item)
